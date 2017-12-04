@@ -62,6 +62,27 @@
       (if (> sum n) sum
         (recur (assoc board [(:x next-c) (:y next-c)] sum) next-c)))))
 
+(defn p04a []
+  (loop [valid 0]
+    (if-let [line (read-line)]
+      (let [words (str/split line #" ")
+            invalid (some (fn [[a b]] (= (nth words a) (nth words b))) (for [a (range 0 (count words)) b (range 0 (count words)) :when (not= a b)] [a b]))]
+        (println words invalid)
+        (recur (+ valid (if invalid 0 1))))
+      valid)))
+
+(defn anagram? [a b]
+  (and (every? (fn [c] (some (fn [c'] (= c c')) b)) a) (= (count a) (count b))))
+
+(defn p04b []
+  (loop [valid 0]
+    (if-let [line (read-line)]
+      (let [words (str/split line #" ")
+            invalid (some (fn [[a b]] (anagram? (nth words a) (nth words b))) (for [a (range 0 (count words)) b (range 0 (count words)) :when (not= a b)] [a b]))]
+        (recur (+ valid (if invalid 0 1))))
+      valid)))
+
 (defn -main
   [& args]
-  (println "Hello, World!"))
+  (println "Hello, World!")
+  (println (p04b)))

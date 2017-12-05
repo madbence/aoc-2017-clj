@@ -82,7 +82,28 @@
         (recur (+ valid (if invalid 0 1))))
       valid)))
 
+(defn p05a []
+  (loop [instructions (loop [i []] (if-let [line (read-line)] (recur (conj i (->int line))) i))
+         pc 0
+         n 0]
+    (if (or (neg? pc) (>= pc (count instructions))) n
+      (recur
+        (assoc instructions pc (inc (get instructions pc)))
+        (+ pc (get instructions pc))
+        (inc n)))))
+
+(defn p05b []
+  (loop [instructions (loop [i []] (if-let [line (read-line)] (recur (conj i (->int line))) i))
+         pc 0
+         n 0]
+    (let [offset (get instructions pc)]
+      (if (or (neg? pc) (>= pc (count instructions))) n
+        (recur
+          (assoc instructions pc (if (> offset 2) (dec offset) (inc offset)))
+          (+ pc offset)
+          (inc n))))))
+
 (defn -main
   [& args]
   (println "Hello, World!")
-  (println (p04b)))
+  (println (p05b)))

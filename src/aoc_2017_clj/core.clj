@@ -103,6 +103,42 @@
           (+ pc offset)
           (inc n))))))
 
+(defn p06a []
+  (loop [banks (vec (map ->int (str/split (read-line) #"\t")))
+         history #{}
+         n 0]
+    (if (contains? history banks) n
+      (let [index (map (fn [n i] [n i]) banks (iterate inc 0))
+            offset (reduce (fn [offset [n i]] (if (> n (get banks offset)) i offset)) 0 index)]
+        (recur (loop [remaining (get banks offset)
+                      banks' (assoc banks offset 0)
+                      offset' (rem (inc offset) (count banks))]
+                 (if (zero? remaining) banks'
+                   (recur
+                     (dec remaining)
+                     (assoc banks' offset' (inc (get banks' offset')))
+                     (rem (inc offset') (count banks)))))
+               (conj history banks)
+               (inc n))))))
+
+(defn p06b []
+  (loop [banks (vec (map ->int (str/split (read-line) #"\t")))
+         history {}
+         n 0]
+    (if (some? (get history banks)) (- n (get history banks))
+      (let [index (map (fn [n i] [n i]) banks (iterate inc 0))
+            offset (reduce (fn [offset [n i]] (if (> n (get banks offset)) i offset)) 0 index)]
+        (recur (loop [remaining (get banks offset)
+                      banks' (assoc banks offset 0)
+                      offset' (rem (inc offset) (count banks))]
+                 (if (zero? remaining) banks'
+                   (recur
+                     (dec remaining)
+                     (assoc banks' offset' (inc (get banks' offset')))
+                     (rem (inc offset') (count banks)))))
+               (assoc history banks n)
+               (inc n))))))
+
 (defn -main
   [& args]
   (println "Hello, World!")

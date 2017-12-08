@@ -166,7 +166,40 @@
         (println name weight children)
         (println (map #(tower-weight tree %) children))))))
 
+(defn p08a []
+  (let [lines (map (fn [line] (let [match (re-find #"^(\w+) (inc|dec) (-?\d+) if (\w+) (.+) (-?\d+)$" line)]
+                                {:target (get match 1) :op (get match 2) :amount (->int (get match 3)) :cond-reg (get match 4) :cond-op (get match 5) :cond-val (->int (get match 6))}))
+                   (loop [lines []] (if-let [line (read-line)] (recur (conj lines line)) lines)))
+        registers (reduce (fn [reg ins]
+                            (if ((get {"==" #(= %1 %2)
+                                       "!=" #(not= %1 %2)
+                                       "<=" #(<= %1 %2)
+                                       ">=" #(>= %1 %2)
+                                       ">"  #(> %1 %2)
+                                       "<"  #(< %1 %2)} (:cond-op ins)) (get reg (:cond-reg ins) 0) (:cond-val ins))
+                              (assoc reg (:target ins) ((get {"inc" +
+                                                              "dec" -} (:op ins)) (get reg (:target ins) 0) (:amount ins)))
+                              reg)) {} lines)]
+    (reduce (fn [max' [name value]] (max max' value)) 0 registers)))
+
+(defn p08b []
+  (let [lines (map (fn [line] (let [match (re-find #"^(\w+) (inc|dec) (-?\d+) if (\w+) (.+) (-?\d+)$" line)]
+                                {:target (get match 1) :op (get match 2) :amount (->int (get match 3)) :cond-reg (get match 4) :cond-op (get match 5) :cond-val (->int (get match 6))}))
+                   (loop [lines []] (if-let [line (read-line)] (recur (conj lines line)) lines)))
+        [_ m] (reduce (fn [[reg m] ins]
+                        (if ((get {"==" #(= %1 %2)
+                                   "!=" #(not= %1 %2)
+                                   "<=" #(<= %1 %2)
+                                   ">=" #(>= %1 %2)
+                                   ">"  #(> %1 %2)
+                                   "<"  #(< %1 %2)} (:cond-op ins)) (get reg (:cond-reg ins) 0) (:cond-val ins))
+                          (let [reg' (assoc reg (:target ins) ((get {"inc" +
+                                                                     "dec" -} (:op ins)) (get reg (:target ins) 0) (:amount ins)))]
+                            [reg' (reduce (fn [m [_ value]] (max m value)) m reg')])
+                          [reg m])) [{} 0] lines)]
+    m))
+
 (defn -main
   [& args]
   (println "Hello, World!")
-  (println (p07b)))
+  (println (p08b)))

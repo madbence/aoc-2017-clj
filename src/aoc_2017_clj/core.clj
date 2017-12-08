@@ -139,7 +139,34 @@
                (assoc history banks n)
                (inc n))))))
 
+(defn p07a []
+  (let [lines (map (fn [line]
+                     (let [match (re-find #"(\w+) \((\d+)\)( -> (.*))?$" line)]
+                       {:name (get match 1) :children (if (get match 4) (str/split (get match 4) #", ") nil)}))
+                   (loop [lines []] (if-let [line (read-line)] (recur (conj lines line)) lines)))
+        tree (reduce (fn [tree node] (assoc tree (:name node) (:children node))) {} lines)]
+    (filter (fn [[k v]] (every? (fn [[k' v']] (every? #(not= % k) v')) tree)) tree)))
+
+(defn tower-weight [tree name]
+  (let [[self-weight children] (get tree name)]
+    (+ self-weight (if children (reduce + (map #(tower-weight tree %) children)) 0))))
+
+(defn p07b []
+  (let [lines (map (fn [line]
+                     (let [match (re-find #"(\w+) \((\d+)\)( -> (.*))?$" line)]
+                       {:name (get match 1) :weight (->int (get match 2)) :children (if (get match 4) (str/split (get match 4) #", ") nil)}))
+                   (loop [lines []] (if-let [line (read-line)] (recur (conj lines line)) lines)))
+        tree (reduce (fn [tree node] (assoc tree (:name node) [(:weight node) (:children node)])) {} lines)]
+    (doseq [suspect (filter (fn [[name [weight children]]]
+                              (if children
+                                (let [first-weight (tower-weight tree (first children))]
+                                  (some #(not= first-weight (tower-weight tree %)) (rest children)))
+                                false)) tree)]
+      (let [[name [weight children]] suspect]
+        (println name weight children)
+        (println (map #(tower-weight tree %) children))))))
+
 (defn -main
   [& args]
   (println "Hello, World!")
-  (println (p05b)))
+  (println (p07b)))

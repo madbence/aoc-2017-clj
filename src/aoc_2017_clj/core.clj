@@ -199,7 +199,35 @@
                           [reg m])) [{} 0] lines)]
     m))
 
+(defn p09a []
+  (let [line (read-line)]
+    (reduce (fn [[state sum n] char]
+              (case state
+                :normal (case char
+                          \{ [:normal sum (inc n)]
+                          \} [:normal (+ sum n) (dec n)]
+                          \< [:garbage sum n]
+                          [:normal sum n])
+                :garbage (case char
+                           \> [:normal sum n]
+                           \! [:ignore sum n]
+                           [:garbage sum n])
+                :ignore [:garbage sum n])) [:normal 0 0] line)))
+
+(defn p09b []
+  (let [line (read-line)]
+    (reduce (fn [[state sum] char]
+              (case state
+                :normal (case char
+                          \< [:garbage sum]
+                          [:normal sum])
+                :garbage (case char
+                           \> [:normal sum]
+                           \! [:ignore sum]
+                           [:garbage (inc sum)])
+                :ignore [:garbage sum])) [:normal 0] line)))
+
 (defn -main
   [& args]
   (println "Hello, World!")
-  (println (p08b)))
+  (println (p09b)))
